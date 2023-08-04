@@ -33,3 +33,6 @@ mongoose.connect(process.env.MONGO_DB, {
 //route configuration
 const userRoute = require('./routes/user')
 app.use('/', userRoute)
+
+const adminRoute = require('./routes/admin')
+app.use('/admin', adminRoute)

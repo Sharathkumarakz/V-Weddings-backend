@@ -2,6 +2,7 @@
 //DB-models
 const User = require('../models/user');
 const Token = require('../models/token');
+
 //bcrypt
 const bcrypt = require('bcrypt');
 const crypto = require('crypto')
@@ -95,13 +96,11 @@ const userActive = async (req, res, next) => { //mail verification
 const login = async (req, res, next) => { //mail verification
     try {
         const { email, password } = req.body
-        
         if (!email || !password) {
             return res.status(401).send({
                 message: "login failed due to lack credentials  "
             });
         } else {
-        
             const user = await User.findOne({ email: email })
             if (!user) {
                 return res.status(401).send({
