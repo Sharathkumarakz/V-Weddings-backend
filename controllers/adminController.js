@@ -110,7 +110,7 @@ const addImage = async (req, res, next) => {  //add image
         let post = new Image({
             image: image.url,
             category: categoryDetails._id,
-            description: details.descriptioon,
+            description: details.description,
             imagePublicId: image.public_id
         })
         await post.save()

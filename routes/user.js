@@ -18,4 +18,6 @@ userRoute.post('/login',authController.login) //user login
 
 userRoute.get('/likeImage/:id',userAuthentication,userController.likeImage) //user active or inactive
 
+userRoute.post('/sendMail',userAuthentication,userController.sendMail) //user send mail 
+
 module.exports=userRoute

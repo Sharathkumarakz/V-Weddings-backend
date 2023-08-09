@@ -11,8 +11,7 @@ const imageSchema=new mongoose.Schema({
     required: true
   },
   description:{
-    type:String,
-    default:null
+    type:String
   },
   imagePublicId:{
     type:String,
