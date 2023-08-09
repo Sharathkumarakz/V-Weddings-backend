@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const mongoose = require('mongoose')
 const cookieParser = require('cookie-parser')
+const fileUpload=require('express-fileupload');
 
 //.env
 require('dotenv').config()
@@ -14,7 +15,7 @@ app.use(express.json());
 //cross origin resource sharing
 app.use(cors({
     credentials: true,
-    origin:'http://localhost:4200'
+    origin:[`${process.env.BASE_URL}`]
   }));
 
 //DB-connection
@@ -29,6 +30,11 @@ mongoose.connect(process.env.MONGO_DB, {
 }).catch((error) => {
     console.log('somthing wrong', error)
 })
+
+//file upload
+app.use(fileUpload({
+    useTempFiles:true
+  }))
 
 //route configuration
 const userRoute = require('./routes/user')
