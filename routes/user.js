@@ -20,4 +20,6 @@ userRoute.get('/likeImage/:id',userAuthentication,userController.likeImage) //us
 
 userRoute.post('/sendMail',userAuthentication,userController.sendMail) //user send mail 
 
+userRoute.get('/likes',userAuthentication,userController.likedImages) //user active or inactive
+
 module.exports=userRoute

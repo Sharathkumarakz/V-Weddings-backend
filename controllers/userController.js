@@ -51,7 +51,32 @@ const sendMail = async (req, res, next) => { //like || unlike
 }
 
 
+
+
+const likedImages = async (req, res, next) => { //like || unlike 
+    try {
+        const userId = req.headers?.userId
+        if (!userId) {
+            return res.status(400).send({
+                message: "unauthenticated"
+            }); 
+        } else {
+       
+            const likedImages = await Image.find(
+                { likes: { $in: [userId] } }
+              ).sort({_id:1})
+        console.log(likedImages);
+        return res.status(200).send( likedImages )
+        }
+    } catch (error) {
+        return res.status(400).send({
+            message: "mail verification failed"
+        });
+    }
+}
+
 module.exports = {
     likeImage,
-    sendMail
+    sendMail,
+    likedImages
 }
