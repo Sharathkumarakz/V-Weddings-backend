@@ -65,7 +65,6 @@ const likedImages = async (req, res, next) => { //like || unlike
             const likedImages = await Image.find(
                 { likes: { $in: [userId] } }
               ).sort({_id:1})
-        console.log(likedImages);
         return res.status(200).send( likedImages )
         }
     } catch (error) {

@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
+const User=require('../models/user')
 module.exports = {
-    userAuthentication(req, res, next) {
+     userAuthentication(req, res, next) {
         const cookie = req.headers.authorization
         if (!cookie) {      
             return res.status(401).send({
@@ -13,9 +14,24 @@ module.exports = {
                     message: "UnAuthenticated"
                 })
             }
-            if (decode) {
+            if (decode){
                 req.headers.userId = decode._id
-                next()
+        //   let user async=await User.findOne({_id:decode._id})
+        User.findOne({ _id: decode._id })
+        .then(userdata => {
+            if (userdata.isBlocked === true) {
+                return res.status(403).send({
+                    message: "Access Denied - User is not allowed"
+                });
+            } else {
+                next(); // Proceed to the next middleware
+            }
+        })
+        .catch(err => {
+            return res.status(500).send({
+                message: "Internal Server Error"
+            });
+        });
             } else {
                 return res.status(401).send({
                     message: "UnAuthenticated"

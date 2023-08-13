@@ -23,7 +23,7 @@ module.exports = async (email, subject, text) => {
         await transport.sendMail({
             from: process.env.USER,
             to: email,
-            subject: subject,
+            subject: "V-Weddings verification link",
             text:text
         })
         console.log('email send successfully')

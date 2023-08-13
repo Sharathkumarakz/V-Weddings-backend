@@ -20,11 +20,26 @@ const register = async (req, res, next) => { //user registration
                 message: "Missing Credentials "
             });
         } else {
-            let userAlreadyExist = await User.findOne({ email: req.body.email })
-            if (userAlreadyExist) {
-                return res.status(200).send({
+            const userAlreadyExist = await User.findOne({ email: req.body.email })
+            if (userAlreadyExist && userAlreadyExist.verified == true) {
+                return res.status(401).send({
                     message: "Email already exist "
                 });
+            }
+            if (userAlreadyExist && userAlreadyExist.verified == false) {
+                const usertokenExist = await Token.findOne({ userId: userAlreadyExist._id })
+                if (usertokenExist) {
+                    return res.status(201).send({ message: "An Email has been sent to your account please Verify" })
+                } else {
+                    const token = crypto.randomBytes(32).toString("hex")
+                    const Ttoken = await new Token({
+                        userId: userAlreadyExist._id,
+                        token: token
+                    }).save();
+                    const url = `${process.env.BASE_URL}/v-wedding/${userAlreadyExist._id}/verify/${Ttoken.token}`
+                    sendEmail(email, "Verify Email", url)
+                    return res.status(201).send({ message: "An Email has been sent to your account please Verify" })
+                }
             } else {
                 const hashedPassword = await bcrypt.hash(password, 10);
                 let user = new User({
@@ -41,7 +56,7 @@ const register = async (req, res, next) => { //user registration
                 }).save();
                 const url = `${process.env.BASE_URL}/v-wedding/${userSaved._id}/verify/${Ttoken.token}`
                 sendEmail(email, "Verify Email", url)
-                res.status(201).send({ message: "An Email has been sent to your account please Verify" })
+                return res.status(201).send({ message: "An Email has been sent to your account please Verify" })
             }
         }
     } catch (err) {
@@ -60,7 +75,15 @@ const verifyMail = async (req, res, next) => { //mail verification
                 message: "verify mail failed due to lack credentials  "
             });
         } else {
-            await User.updateOne({ _id: userId }, { $set: { verified: true } })
+            const user=await User.findOne({ _id:userId}) 
+            if(!user)return res.status(400).send({message:'invalid Link'})
+
+            const tokendetails=await Token.findOne({token:token})
+            if(!tokendetails){
+                return res.status(400).send({message:'invalid Link'})
+            }
+           await User.updateOne({ _id: userId }, {$set: { verified: true } })
+
             await Token.deleteOne({ token: token })
             const jwttoken = jwt.sign({ _id: userId }, process.env.JWT_USER_SECRETKEY);
             res.status(200).json({ jwttoken });
@@ -107,14 +130,32 @@ const login = async (req, res, next) => { //mail verification
                     message: "User not Found"
                 });
             }
-            const passwordMatch = await bcrypt.compare(password, user.password);
-            if (!passwordMatch) {
-                return res.status(401).send({
-                    message: "Password is incorrect"
-                });
-            }else{
-                const jwttoken = jwt.sign({ _id:user._id }, process.env.JWT_USER_SECRETKEY);
-                res.status(200).json({ jwttoken });
+            if (!user.verified) {
+                const usertokenExist = await Token.findOne({ userId: user._id })
+                if (usertokenExist) {
+                    await Token.deleteOne({ userId: user._id })
+                }
+
+                
+                const token = crypto.randomBytes(32).toString("hex")
+                const Ttoken = await new Token({
+                    userId: user._id,
+                    token: token
+                }).save();
+                const url = `${process.env.BASE_URL}/v-wedding/${user._id}/verify/${Ttoken.token}`
+                sendEmail(email, "Verify Email", url)
+                return res.status(401).send({ message: "An Email has been sent to your account please Verify" })
+            
+            } else {
+                const passwordMatch = await bcrypt.compare(password, user.password);
+                if (!passwordMatch) {
+                    return res.status(401).send({
+                        message: "Password is incorrect"
+                    });
+                } else {
+                    const jwttoken = jwt.sign({ _id: user._id }, process.env.JWT_USER_SECRETKEY);
+                    res.status(200).json({ jwttoken });
+                }
             }
         }
 

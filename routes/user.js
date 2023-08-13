@@ -22,4 +22,6 @@ userRoute.post('/sendMail',userAuthentication,userController.sendMail) //user se
 
 userRoute.get('/likes',userAuthentication,userController.likedImages) //user active or inactive
 
+
+
 module.exports=userRoute
