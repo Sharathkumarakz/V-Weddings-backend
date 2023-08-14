@@ -137,7 +137,7 @@ const addImage = async (req, res, next) => {  //add image
 
 const categoryWiseImages = async (req, res, next) => { //category wise image getting
     try {
-        let data = await Image.find({ category: req.params.id }).populate('category')
+        let data = await Image.find({ category: req.params.id }).populate('category').sort({_id:1})
         res.send(data);
     } catch (error) {
         return res.status(400).send({
